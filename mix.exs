@@ -3,8 +3,8 @@ defmodule ReadmeMdDoc.Mixfile do
 
   def project, do:
     [ app: :readme_md_doc,
-      version: "0.0.1",
-      elixir: "~> 1.2-rc",
+      version: "0.1.0",
+      elixir: "~> 1.1",
       source_url: "https://github.com/jisaacstone/readme_md_docgen",
       package: package,
       deps: deps,
@@ -17,6 +17,6 @@ defmodule ReadmeMdDoc.Mixfile do
      links: %{"GitHub" => "https://github.com/jisaacstone/readme_md_docgen"} ]
 
   defp deps, do:
-    [ {:ex_doc, "~> 0.11", only: :dev} ]
-
+    [ {:ex_doc, "~> 0.11"},
+      {:argument_parser, "~> 0.1"} ]
 end

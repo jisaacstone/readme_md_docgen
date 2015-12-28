@@ -1,12 +1,18 @@
 defmodule ReadmeMdDoc.Formatter do
   @funct [:def, :defmacro, :callback]
-  @order [:title, :links, :moduledoc, :typespecs] ++ @funct
+  @default_order [:title, :about, :links, :moduledoc, :typespecs] ++ @funct
+
+  @spec mm_head([atom], [term]) :: iodata
+  def mm_head(modules, config) do
+    Enum.map(modules, fn(mod) -> "[`#{mod}`](##{mod})\n\n" end)
+  end
 
   @spec format(%ExDoc.ModuleNode{}, list) :: iodata
   def format(node, config) do
     docs_map = by_type(node.docs, %{def: [], defmacro: [], callback: []})
     node_data = Map.merge(Map.from_struct(node), docs_map)
-    Enum.map(@order, &format(&1, node_data, config))
+    order = Dict.get(config, :order, @default_order)
+    Enum.map(order, &format(&1, node_data, config))
   end
 
   defp by_type([], res) do
@@ -23,9 +29,12 @@ defmodule ReadmeMdDoc.Formatter do
   defp format(:title, %{id: id}, config)
   when is_binary(id) do
     [ "# #{id}\n",
-      (if v = Dict.get(config, :version), do: ["version", v], else: ""),
-      nl_sep(Dict.get(config, :about, [])),
+      (if config[:link_title], do: [anchor(id), ?\n], else: ""),
+      (if v = Dict.get(config, :version), do: ["version", v, ?\n], else: ""),
       ?\n ]
+  end
+  defp format(:about, _, config) do
+    if (abt = Dict.get(config, :about, :false)), do: nl_sep(abt), else: ""
   end
   defp format(:links, node, _config) do
     l = Enum.map([:typespecs | @funct], &link(funct_name(&1), node[&1]))
@@ -62,10 +71,10 @@ defmodule ReadmeMdDoc.Formatter do
     [ h2("types") | format_typespecs(types, []) ]
   end
   defp format_typespecs([], formatted) do
-    Enum.reverse(formatted)
+    ["<pre>", Enum.reverse(formatted), "</pre>"]
   end
   defp format_typespecs([ts|t], formatted) do
-    f = ["### ", ts.spec, ?\n, nl_sep(ts.doc), ?\n]
+    f = [ts.spec, ?\n, nl_sep(ts.doc), ?\n]
     format_typespecs(t, [f|formatted])
   end
 
@@ -81,7 +90,7 @@ defmodule ReadmeMdDoc.Formatter do
   end
   defp format_funs([d|t], formatted) do
     f = """
-    ### #{d.signature} <a name="f:#{d.id}"></a>
+    ### #{d.signature} #{anchor(d.id)}
     #{nl_sep(d.doc)}
     """
     format_funs(t, [f|formatted])
@@ -98,4 +107,6 @@ defmodule ReadmeMdDoc.Formatter do
     title = String.upcase(<<fc>>) <> rest
     ~s{## #{title} <a name="#{str}"></a>\n\n}
   end
+
+  defp anchor(name), do: ~s(<a name="#{name}"></a>)
 end
