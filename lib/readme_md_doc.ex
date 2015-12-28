@@ -12,11 +12,11 @@ defmodule ReadmeMdDoc do
   @doc """
   Generate markdown documentation for a module or list of modules.
 
-  Options    |
-  -----------|---
-  `:order`   | Sections to be included in order. Default:
-             | `[:title, :about, :links, :moduledoc, :typespecs, :def, :defmacro, :callback]`
-  `:about`   | Any additional information you'd like to be included.
+  Options:
+
+  * `:order` -> Sections to be included in order. Default:
+               `[:title, :about, :links, :moduledoc, :typespecs, :def, :defmacro, :callback]`
+  * `:about` -> Any additional information you'd like to be included.
 
   if multiple modules are included then a header with links to the documentation
   for each will be generated as well.
