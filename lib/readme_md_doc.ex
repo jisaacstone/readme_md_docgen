@@ -24,9 +24,9 @@ defmodule ReadmeMdDoc do
   @spec generate(atom | binary | [atom] | [binary], Dict.t) :: iodata
   def generate([module], config), do: generate(module, config)
   def generate(modules, config) when is_list(modules) do
-    head = ReadmeMdDoc.Formatter.mm_head(modules, config)
-    conf = Dict.put(config, :link_title, :true)
-    body = Enum.map(modules, &generate(&1, conf))
+    {head, config} = ReadmeMdDoc.Formatter.mm_head(modules, config)
+    config = Dict.put(config, :link_title, :true)
+    body = Enum.map(modules, &generate(&1, config))
     [head | body]
   end
   def generate(module, config) when is_binary(module) do

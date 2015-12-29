@@ -17,22 +17,26 @@ defmodule Mix.Tasks.ReadmeGen do
   * `-h --help` -> Print detailed help message.
   """
 
-  @arg [:module,
-        action: {:append, :+, &ReadmeMdDoc.to_mod/1},
-        required: :true]
+  @arg [:modules, metavar: "MODULE", action: {:store, :*, &ReadmeMdDoc.to_mod/1}]
   @flag [:filename, alias: :f, default: "README.md"]
   @flag [:append, action: :store_true, help:
          "Append to existing file instead of overwriting"]
 
   @doc :false
-  def main(args) do
-    mode = if args.append, do: :append, else: :write
-    fob = File.open!(args.filename, [:utf8, mode])
-    try do: generate(args.module, fob), after: File.close(fob)
+  def main(cm_args) do
+    cf_args = Application.get_all_env(:readme_md_doc)
+    args = Dict.merge(cf_args, cm_args)
+    if args[:module] == [] do
+      IO.puts("one or more module names required")
+      exit(1)
+    end
+    mode = if args[:append], do: :append, else: :write
+    fob = File.open!(args[:filename], [:utf8, mode])
+    try do: generate(args[:modules], args, fob), after: File.close(fob)
   end
 
-  defp generate(mods, fob) do
-    doc = ReadmeMdDoc.generate(mods)
+  defp generate(mods, args, fob) do
+    doc = ReadmeMdDoc.generate(mods, args)
     IO.write(fob, doc)
   end
 end

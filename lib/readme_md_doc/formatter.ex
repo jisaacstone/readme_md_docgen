@@ -12,7 +12,10 @@ defmodule ReadmeMdDoc.Formatter do
 
   @spec mm_head([atom], [term]) :: iodata
   def mm_head(modules, config) do
-    Enum.map(modules, fn(mod) -> "[`#{mod}`](##{mod})\n\n" end)
+    links = Enum.map(modules, fn(mod) -> "[`#{mod}`](##{mod})\n\n" end)
+    {about, conf} = Dict.pop(config, :about, :nil)
+    print_about? = about != :nil and :about in Dict.get(conf, :order, [:about])
+    {[links, ifs(print_about?, [about, ?\n])], conf}
   end
 
   @spec format(%ExDoc.ModuleNode{}, list) :: iodata
