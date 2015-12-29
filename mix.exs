@@ -3,7 +3,7 @@ defmodule ReadmeMdDoc.Mixfile do
 
   def project, do:
     [ app: :readme_md_doc,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.1",
       source_url: "https://github.com/jisaacstone/readme_md_docgen",
       package: package,

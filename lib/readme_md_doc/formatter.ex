@@ -2,6 +2,14 @@ defmodule ReadmeMdDoc.Formatter do
   @funct [:def, :defmacro, :callback]
   @default_order [:title, :about, :links, :moduledoc, :typespecs] ++ @funct
 
+  defmacrop ifs(condition, action) do
+    quote do
+      if unquote(condition) do
+        unquote(action)
+      else "" end
+    end
+  end
+
   @spec mm_head([atom], [term]) :: iodata
   def mm_head(modules, config) do
     Enum.map(modules, fn(mod) -> "[`#{mod}`](##{mod})\n\n" end)
@@ -28,13 +36,12 @@ defmodule ReadmeMdDoc.Formatter do
 
   defp format(:title, %{id: id}, config)
   when is_binary(id) do
-    [ "# #{id}\n",
-      (if config[:link_title], do: [anchor(id), ?\n], else: ""),
-      (if v = Dict.get(config, :version), do: ["version", v, ?\n], else: ""),
-      ?\n ]
+    [ "# #{id}\n\n",
+      ifs(config[:link_title], [anchor(id), "\n\n"]),
+      ifs(v = Dict.get(config, :version), ["version", v, "\n\n"]) ]
   end
   defp format(:about, _, config) do
-    if (abt = Dict.get(config, :about, :false)), do: nl_sep(abt), else: ""
+    ifs(abt = Dict.get(config, :about, :false), nl_sep(abt))
   end
   defp format(:links, node, _config) do
     l = Enum.map([:typespecs | @funct], &link(funct_name(&1), node[&1]))
